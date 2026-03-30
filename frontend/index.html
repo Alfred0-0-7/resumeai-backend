@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI Resume Analyzer – Upload your resume and get instant AI-powered analysis, scoring, and job matching.">
+    <title>ResumeAI – AI Resume Analyzer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <!-- Animated Particle Background -->
+    <canvas id="particleCanvas"></canvas>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-brand">
+            <span class="brand-icon">◈</span>
+            <span class="brand-text">Resume<span class="brand-accent">AI</span></span>
+        </div>
+        <div class="nav-links">
+            <a href="/" class="nav-link active">Home</a>
+            <a href="/dashboard" class="nav-link">Dashboard</a>
+            <a href="/history" class="nav-link">History</a>
+        </div>
+    </nav>
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="hero-content">
+            <div class="hero-badge animate-fade-in">
+                <span class="badge-dot"></span>
+                AI-Powered Analysis
+            </div>
+            <h1 class="hero-title animate-fade-in-up">
+                Analyze Your Resume<br>
+                <span class="gradient-text">With Intelligence</span>
+            </h1>
+            <p class="hero-subtitle animate-fade-in-up delay-1">
+                Upload your resume and get instant AI-powered insights —
+                skill extraction, scoring, improvement tips, and job matching.
+            </p>
+            <!-- Upload Zone -->
+            <div class="upload-zone animate-fade-in-up delay-2" id="uploadZone">
+                <div class="upload-zone-inner">
+                    <div class="upload-icon-wrapper">
+                        <svg class="upload-icon" viewBox="0 0 64 64" fill="none">
+                            <path d="M32 8L32 40" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                            <path d="M20 20L32 8L44 20" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M8 40V48C8 52.4183 11.5817 56 16 56H48C52.4183 56 56 52.4183 56 48V40" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="upload-title">Drop your resume here</h3>
+                    <p class="upload-hint">or click to browse • PDF only • Max 10MB</p>
+                    <input type="file" id="fileInput" accept=".pdf" hidden>
+                    <button class="upload-btn" id="uploadBtn">
+                        <span>Select PDF</span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </button>
+                </div>
+                <!-- Upload Progress -->
+                <div class="upload-progress" id="uploadProgress">
+                    <div class="progress-file-name" id="progressFileName"></div>
+                    <div class="progress-bar-track">
+                        <div class="progress-bar-fill" id="progressBarFill"></div>
+                    </div>
+                    <div class="progress-status" id="progressStatus">Analyzing...</div>
+                </div>
+            </div>
+        </div>
+        <!-- Floating Feature Cards -->
+        <div class="features-grid animate-fade-in-up delay-3">
+            <div class="feature-card">
+                <div class="feature-icon">🔍</div>
+                <h4>Smart Parsing</h4>
+                <p>Extracts skills, education & experience from your PDF</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h4>Resume Score</h4>
+                <p>Get a 0–100 score with detailed category breakdown</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💡</div>
+                <h4>AI Suggestions</h4>
+                <p>Personalized tips to improve your resume quality</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎯</div>
+                <h4>Job Matching</h4>
+                <p>Find jobs that match your skill set instantly</p>
+            </div>
+        </div>
+    </section>
+    <!-- Error Toast -->
+    <div class="toast" id="errorToast">
+        <span class="toast-icon">⚠️</span>
+        <span class="toast-message" id="toastMessage"></span>
+    </div>
+    <script src="/static/particles.js"></script>
+    <script src="/static/main.js"></script>
+</body>
+</html>

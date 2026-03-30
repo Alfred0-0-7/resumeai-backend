@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Resume Analysis History – View your past resume analyses.">
+    <title>History – ResumeAI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <canvas id="particleCanvas"></canvas>
+    <nav class="navbar" id="navbar">
+        <div class="nav-brand">
+            <span class="brand-icon">◈</span>
+            <span class="brand-text">Resume<span class="brand-accent">AI</span></span>
+        </div>
+        <div class="nav-links">
+            <a href="/" class="nav-link">Home</a>
+            <a href="/dashboard" class="nav-link">Dashboard</a>
+            <a href="/history" class="nav-link active">History</a>
+        </div>
+    </nav>
+
+    <main class="history-page">
+        <div class="dash-header animate-fade-in">
+            <div>
+                <h1 class="dash-title">Analysis History</h1>
+                <p class="dash-subtitle" id="historySubtitle">Loading your previous analyses…</p>
+            </div>
+            <button class="btn-danger" id="clearHistoryBtn" style="display:none;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14"/>
+                </svg>
+                Clear All
+            </button>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="historyLoading" style="text-align:center;padding:60px 0;">
+            <div class="empty-icon" style="animation:float 2s ease-in-out infinite;">⏳</div>
+            <p style="color:var(--text-secondary);margin-top:12px;">Fetching history…</p>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="historyEmpty" style="display:none;">
+            <div class="empty-icon">🕐</div>
+            <h2>No History Yet</h2>
+            <p>Your resume analyses will appear here after you <a href="/">upload a resume</a>.</p>
+        </div>
+
+        <!-- Error State -->
+        <div class="empty-state" id="historyError" style="display:none;">
+            <div class="empty-icon">⚠️</div>
+            <h2>Failed to Load</h2>
+            <p id="historyErrorMsg">Could not connect to the server.</p>
+        </div>
+
+        <!-- History Cards -->
+        <div class="history-list" id="historyList" style="display:none;"></div>
+
+        <!-- Pagination -->
+        <div id="pagination" style="display:none;text-align:center;margin-top:28px;gap:10px;display:flex;justify-content:center;flex-wrap:wrap;"></div>
+    </main>
+
+    <script src="/static/particles.js"></script>
+    <script>
+    // ── History Page – API-backed ──────────────────────────────────────────
+    const LIMIT = 10;
+    let currentPage = 1;
+    let totalItems  = 0;
+
+    const listEl      = document.getElementById('historyList');
+    const emptyEl     = document.getElementById('historyEmpty');
+    const loadingEl   = document.getElementById('historyLoading');
+    const errorEl     = document.getElementById('historyError');
+    const errorMsgEl  = document.getElementById('historyErrorMsg');
+    const clearBtn    = document.getElementById('clearHistoryBtn');
+    const subtitleEl  = document.getElementById('historySubtitle');
+    const paginationEl = document.getElementById('pagination');
+
+    async function loadHistory(page = 1) {
+        // Reset UI
+        loadingEl.style.display = '';
+        listEl.style.display    = 'none';
+        emptyEl.style.display   = 'none';
+        errorEl.style.display   = 'none';
+        paginationEl.style.display = 'none';
+
+        try {
+            const res = await fetch(`/api/history?page=${page}&limit=${LIMIT}`);
+            if (!res.ok) throw new Error(`Server error: ${res.status}`);
+            const { items, total } = await res.json();
+
+            totalItems  = total;
+            currentPage = page;
+            loadingEl.style.display = 'none';
+
+            if (items.length === 0) {
+                emptyEl.style.display = '';
+                subtitleEl.textContent = 'No analyses yet.';
+                clearBtn.style.display = 'none';
+                return;
+            }
+
+            subtitleEl.textContent = `${total} analysis${total !== 1 ? 'es' : ''} stored`;
+            clearBtn.style.display = '';
+            listEl.style.display   = '';
+
+            listEl.innerHTML = items.map((item, idx) => {
+                const date = new Date(item.timestamp).toLocaleDateString('en-US', {
+                    year: 'numeric', month: 'short', day: 'numeric',
+                    hour: '2-digit', minute: '2-digit'
+                });
+                const scoreClass = item.total_score >= 70 ? 'score-high'
+                                 : item.total_score >= 40 ? 'score-mid' : 'score-low';
+                return `
+                <div class="history-card glass-card animate-fade-in-up" style="animation-delay:${idx * 0.07}s">
+                    <div class="history-card-header">
+                        <div class="history-file-info">
+                            <span class="history-file-icon">📄</span>
+                            <div>
+                                <h3 class="history-filename">${escHtml(item.filename)}</h3>
+                                <p class="history-date">${date}</p>
+                            </div>
+                        </div>
+                        <div class="history-score ${scoreClass}">${item.total_score}</div>
+                    </div>
+                    <div class="history-card-body">
+                        <div class="history-meta">
+                            <span>👤 ${escHtml(item.name)}</span>
+                            <span>🛠️ ${item.skill_count} skills</span>
+                            <span>🎯 ${item.job_match_count} job matches</span>
+                        </div>
+                        <div class="history-actions">
+                            <button class="btn-secondary btn-sm" onclick="viewResult('${item.id}')">View Details</button>
+                            <button class="btn-ghost btn-sm"      onclick="deleteEntry('${item.id}', this)">Remove</button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            // Pagination
+            const totalPages = Math.ceil(total / LIMIT);
+            if (totalPages > 1) {
+                paginationEl.style.display = 'flex';
+                paginationEl.innerHTML = Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .map(p => `
+                    <button class="btn-secondary btn-sm${p === page ? ' active-page' : ''}"
+                            onclick="loadHistory(${p})" style="${p === page ? 'opacity:0.4;cursor:default' : ''}">
+                        ${p}
+                    </button>`).join('');
+            }
+
+        } catch (err) {
+            loadingEl.style.display = 'none';
+            errorEl.style.display   = '';
+            errorMsgEl.textContent  = err.message || 'Could not connect to the server.';
+        }
+    }
+
+    async function viewResult(id) {
+        window.location.href = `/dashboard?id=${id}`;
+    }
+
+    async function deleteEntry(id, btn) {
+        btn.disabled = true;
+        btn.textContent = '…';
+        try {
+            const res = await fetch(`/api/history/${id}`, { method: 'DELETE' });
+            if (res.ok || res.status === 204) {
+                // Reload current page (or go back one if empty)
+                const cardsLeft = document.querySelectorAll('.history-card').length - 1;
+                const newPage = cardsLeft === 0 && currentPage > 1 ? currentPage - 1 : currentPage;
+                loadHistory(newPage);
+            } else {
+                btn.disabled = false;
+                btn.textContent = 'Remove';
+                alert('Failed to delete entry.');
+            }
+        } catch {
+            btn.disabled = false;
+            btn.textContent = 'Remove';
+        }
+    }
+
+    clearBtn.addEventListener('click', async () => {
+        if (!confirm('Clear ALL history? This cannot be undone.')) return;
+        clearBtn.disabled = true;
+        try {
+            await fetch('/api/history', { method: 'DELETE' });
+            loadHistory(1);
+        } finally {
+            clearBtn.disabled = false;
+        }
+    });
+
+    function escHtml(str) {
+        return String(str)
+            .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // Init
+    loadHistory(1);
+    </script>
+
+    <style>
+    .active-page { border-color: var(--accent-2) !important; color: var(--accent-2) !important; }
+    </style>
+    <script src="/static/chatbot.js"></script>
+</body>
+</html>

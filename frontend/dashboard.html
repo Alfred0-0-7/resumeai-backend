@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Resume Analysis Dashboard – View your resume score, detected skills, improvement suggestions, and job matches.">
+    <title>Dashboard – ResumeAI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+   <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <canvas id="particleCanvas"></canvas>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-brand">
+            <span class="brand-icon">◈</span>
+            <span class="brand-text">Resume<span class="brand-accent">AI</span></span>
+        </div>
+        <div class="nav-links">
+            <a href="/" class="nav-link">Home</a>
+            <a href="/dashboard" class="nav-link active">Dashboard</a>
+            <a href="/history" class="nav-link">History</a>
+        </div>
+    </nav>
+    <!-- Dashboard Container -->
+    <main class="dashboard" id="dashboard">
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState">
+            <div class="empty-icon">📄</div>
+            <h2>No Analysis Yet</h2>
+            <p>Upload a resume from the <a href="/">home page</a> to see your results here.</p>
+        </div>
+        <!-- Results (hidden by default, shown when data exists) -->
+        <div class="dashboard-content" id="dashboardContent" style="display:none;">
+            <!-- Header Row -->
+            <div class="dash-header animate-fade-in">
+                <div>
+                    <h1 class="dash-title">Analysis Results</h1>
+                    <p class="dash-subtitle" id="dashFilename"></p>
+                </div>
+                <a href="/" class="btn-secondary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                    New Analysis
+                </a>
+            </div>
+            <!-- Profile Card -->
+            <div class="profile-card glass-card animate-fade-in-up">
+                <div class="profile-info">
+                    <div class="profile-avatar" id="profileAvatar">?</div>
+                    <div>
+                        <h2 id="profileName">—</h2>
+                        <p class="profile-detail" id="profileEmail"></p>
+                        <p class="profile-detail" id="profilePhone"></p>
+                    </div>
+                </div>
+            </div>
+            <!-- Score + Skills Row -->
+            <div class="dash-grid-2">
+                <!-- Score Card -->
+                <div class="glass-card score-card animate-fade-in-up delay-1">
+                    <h3 class="card-title">Resume Score</h3>
+                    <div class="score-ring-container">
+                        <svg class="score-ring" viewBox="0 0 200 200">
+                            <circle class="score-ring-bg" cx="100" cy="100" r="85" />
+                            <circle class="score-ring-fill" id="scoreRingFill" cx="100" cy="100" r="85" />
+                        </svg>
+                        <div class="score-value" id="scoreValue">0</div>
+                    </div>
+                    <div class="score-breakdown" id="scoreBreakdown"></div>
+                </div>
+                <!-- Skills Card -->
+                <div class="glass-card skills-card animate-fade-in-up delay-2">
+                    <h3 class="card-title">Detected Skills</h3>
+                    <div class="skills-count" id="skillsCount">0 skills found</div>
+                    <div class="skills-tags" id="skillsTags"></div>
+                </div>
+            </div>
+            <!-- Suggestions -->
+            <div class="glass-card suggestions-card animate-fade-in-up delay-3">
+                <h3 class="card-title">Improvement Suggestions</h3>
+                <div class="suggestions-list" id="suggestionsList"></div>
+            </div>
+            <!-- Job Matches -->
+            <div class="glass-card jobs-card animate-fade-in-up delay-4">
+                <h3 class="card-title">Job Matches</h3>
+                <div class="jobs-grid" id="jobsGrid"></div>
+            </div>
+            <!-- Education & Experience -->
+            <div class="dash-grid-2">
+                <div class="glass-card animate-fade-in-up delay-5">
+                    <h3 class="card-title">🎓 Education</h3>
+                    <pre class="section-text" id="educationText">—</pre>
+                </div>
+                <div class="glass-card animate-fade-in-up delay-5">
+                    <h3 class="card-title">💼 Experience</h3>
+                    <pre class="section-text" id="experienceText">—</pre>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script src="/static/particles.js"></script>
+    <script src="/static/dashboard.js"></script>
+    <script src="/static/chatbot.js"></script>
+</body>
+</html>
